@@ -1,0 +1,1041 @@
+#include <iostream>
+#include <iomanip>
+#include <string.h>
+#include <fstream>
+#include <conio.h>
+using namespace std;
+// StRUCTURE==============================================================>
+struct student
+{
+    int id;
+    char name[20];
+    char fathern[20];
+    string program; // fsc(bio),fsc(eng),ics,fa
+    int year;       // 1st,2nd
+    int totalfee;
+    string admissiontype;
+    int stransport;
+    int afine;
+    string status;
+};
+student a[100];
+
+struct programdata
+{
+    // options can only change by admin
+    int admissionf = 0;    // for only 1st year students
+    int biolabf = 0;       // for only biology student
+    int chemistryf = 0;    // fsc(pre-eng) student
+    int computerf = 0;     // for ics students
+    int libraryf = 0;      // for each and every student
+    int transport = 0;     // check by data entry person
+    int artssocioetyf = 0; // for only arts students
+    int latefine = 0;      // check by data entry person
+    string lastdate;
+    int package;
+    // 0 is fsc(med),1 is fsc(eng),2 is ics,3 is fa,
+};
+programdata d[4];
+
+// GLOBAL VARIABLES=========================================================>
+const string adminname = "a";
+const string password = "a";
+int nostudent2;
+int nostudent = 0; // no of students
+
+int packageamount;
+// main-FUNCTIONS opt=======================================================>
+void intro();
+int pack(int);
+void studentsearch();
+// manage data
+void manage();
+// sub functions
+void adddata();
+void updatedata();
+void deletedata();
+void displaydata();
+int feecal(string, string, int, int, int);
+// search data
+void search();
+// report data
+void report();
+// to file data
+void tofile();
+// from file data
+void getdata();
+// go data to file
+void godata();
+// get data from file
+void studentdata();
+// Program Print
+void groundline()
+{
+    cout << "___________________________________________________________________________________" << endl;
+    ;
+}
+void strongline()
+{
+    cout << "===================================================================================" << endl;
+    ;
+}
+// MAIN FUNCTION============================================================>
+int main()
+{
+    strongline();
+    cout << "UNIVERSITY OF SARGODHA" << endl;
+    strongline();
+    cout << "PROJECT:FEE MANAGEMENT SYSTEM" << endl;
+    strongline();
+    fstream inpass;
+    inpass.open("amount.txt", ios::in);
+    if (inpass.is_open())
+    {
+        inpass >> nostudent2;
+    }
+    inpass.close();
+
+    cout << nostudent;
+    getdata();
+    studentdata();
+    int choice = 1;
+    do
+    {
+        //<--------------------------OPTION AREA------------------------------->
+        int choice2; // 2)options choice
+        groundline();
+        cout << "Enter Your Choice\n0)User Type Select\n1)Manage Data\n2)Search Data\n3)Reports\n4)Exit" << endl;
+        cin >> choice2;  // 2)
+        switch (choice2) // 2)
+        {
+        case 0:
+        {
+            intro();
+            break;
+        }
+        case 1:
+        {
+            manage();
+            break;
+        }
+        case 2:
+        {
+            search();
+            break;
+        }
+        case 3:
+        {
+            report();
+            break;
+        }
+        case 4:
+        {
+            break;
+        }
+        }
+
+        cout << "Go Back To Main Menu (Press 1)" << endl;
+        cin >> choice;
+    } while (choice == 1);
+    nostudent2 = nostudent;
+    fstream out;
+    out.open("amount.txt", ios::out);
+    if (out.is_open())
+    {
+        out << nostudent2 << endl;
+    }
+    out.close();
+    // else{
+    //     cout<<"File not found"<<endl;
+    // }
+
+    //<-----------------------------END---------------------------------->
+    tofile();
+    godata();
+    return 0;
+}
+
+// ============================First Module================================>
+void intro()
+{
+    int choice5 = 1;
+    groundline();
+    cout << "Status Selection" << endl;
+    groundline();
+    cout << "Who You Are?\n1)Admin\n2)Data Entry Operator\n3)Student\n"
+         << endl;
+    int choice0;
+    int choice01 = 1;
+    cin >> choice0;
+    switch (choice0)
+    {
+    case 1:
+    {
+        string name, apassword;
+        cout << "Enter Admin Name:" << endl;
+        cin >> name;
+        cout << "Enter Password:" << endl;
+        cin >> apassword;
+        int choice4;
+        if (name == adminname && password == apassword)
+        {
+            groundline();
+            cout << "Current status:\tAdmin" << endl;
+            groundline();
+            for (int i = 0; i < 5; i++)
+            {
+                cout << "You Want to Enter OR Edit Which Group's Data" << endl;
+                cout << "0)FSC(MED)\t1)FSC(ENG)\t2)ICS\t3)FA\t\n";
+                cin >> choice4;
+                cout << "Admission fund:Rs.";
+                cin >> d[choice4].admissionf;
+                if (choice4 == 0)
+                {
+                    cout << "Biology lab fund:Rs.";
+                    cin >> d[choice4].biolabf;
+                }
+                if (choice4 == 1)
+                {
+                    cout << "Chemistry fund:Rs.";
+                    cin >> d[choice4].chemistryf;
+                }
+                if (choice4 == 2)
+                {
+                    cout << "Computer fund:Rs.";
+                    cin >> d[choice4].computerf;
+                }
+                cout << "Library fund:Rs";
+                cin >> d[choice4].libraryf;
+
+                cout << "Transport fund:Rs.";
+                cin >> d[choice4].transport;
+
+                if (choice4 == 3)
+                {
+                    cout << "Funds For Arts Society:Rs.";
+                    cin >> d[choice4].artssocioetyf;
+                }
+                cout << "Fine Amount:Rs.";
+                cin >> d[choice4].latefine;
+
+                cout << "Last date For Submission of Fee:Rs.";
+                cin >> d[choice4].lastdate;
+
+                cout << "Package of Program" << endl;
+                cout << "Rs.";
+                d[choice4].package = pack(choice4);
+                strongline();
+
+                cout << "You Want to add more programs data(press 0 for exit)" << endl;
+                cin >> choice5;
+                if (choice5 == 0)
+                {
+                    break;
+                }
+            }
+        }
+        break;
+    }
+
+    case 2:
+    {
+        break;
+    }
+    case 3:
+    {
+        studentsearch();
+    }
+    }
+}
+// initial package amount calculate
+int pack(int a)
+{
+    groundline();
+    cout << "Enter Package Amount For Relevent Program" << endl;
+    cout << "0)FSC(MED)\t1)FSC(ENG)\t2)ICS\t3)FA\t\n";
+    if (a == 0)
+    {
+        cin >> packageamount;
+    }
+    else if (a == 1)
+    {
+        cin >> packageamount;
+    }
+    else if (a = 2)
+    {
+        cin >> packageamount;
+    }
+    else if (a == 3)
+    {
+        cin >> packageamount;
+    }
+    return packageamount;
+}
+//================Manage Data =============================================>
+void manage()
+{
+    char choice6;
+    groundline();
+    cout << "Running Module:Data Management";
+    groundline();
+    cout << "Select Option" << endl;
+    cout << "a)Add Data\tb)Update Data\tc)Delete Data\td)Display Data\te)Exit\n";
+    cin >> choice6;
+    switch (choice6)
+    {
+    case 'a':
+    {
+        adddata();
+        break;
+    }
+
+    case 'b':
+    {
+        updatedata();
+        break;
+    }
+    case 'c':
+    {
+        deletedata();
+        break;
+    }
+    case 'd':
+    {
+        displaydata();
+        break;
+    }
+    case 'e':
+    {
+        break;
+    }
+    }
+}
+
+// add data
+void adddata()
+{
+    groundline();
+    cout << "Running Module:Add Data" << endl;
+    groundline();
+    int choice08 = 1;
+    do
+    {
+
+        cout << "ID:" << endl;
+        cin >> a[nostudent].id;
+
+        cout << "Name:" << endl;
+        cin >> a[nostudent].name;
+
+        cout << "Father Name:" << endl;
+        cin >> a[nostudent].fathern;
+
+        cout << "Program[FSC(med),FSC(eng),ICS,FA]" << endl;
+        cin >> a[nostudent].program;
+        string prog = a[nostudent].program; // pass
+
+        cout << "Intermediate(Part 1 or 2)" << endl;
+        cin >> a[nostudent].year;
+        int ayear = a[nostudent].year; // pass
+
+        cout << "Admission Type(Enter 'New' For New Qamar)" << endl;
+        cin >> a[nostudent].admissiontype;
+        string atype = a[nostudent].admissiontype; // pass
+
+        cout << "Student Use Transport(1/0)" << endl;
+        cin >> a[nostudent].stransport;
+        int trans = a[nostudent].stransport; // pass
+
+        cout << "Fined(1/0)" << endl;
+        cin >> a[nostudent].afine;
+        int bfine = a[nostudent].afine; // pass
+
+        cout << "Status(Paid or NotPaid)" << endl;
+        cin >> a[nostudent].status;
+        // get the fee amount from admin block
+
+        cout << "Total Fee:Rs.";
+        a[nostudent].totalfee = feecal(string(prog), string(atype), int(ayear), int(trans), int(bfine));
+        cout << a[nostudent].totalfee << endl;
+        groundline();
+        cout << "Add Another Student Data:" << endl;
+        cin >> choice08;
+        strongline();
+        nostudent++;
+    } while (choice08 == 1);
+    main();
+}
+
+int feecal(string aprog, string btype, int byear, int atrans, int cfine)
+{
+    int tfee;
+    // Pre-Medical
+    if (aprog == "FSC(med)")
+    {
+        tfee = d[0].package + d[0].biolabf + d[0].libraryf;
+        // Admission type or Year
+        if (btype == "New" || byear == 1)
+        {
+            tfee += d[0].admissionf;
+        }
+        if (atrans == 1)
+        {
+            tfee += d[0].transport;
+        }
+        if (cfine == 1)
+        {
+            tfee += d[0].latefine;
+        }
+    }
+    // Pre-Eng
+    if (aprog == "FSC(eng)")
+    {
+        // loaddata(1);
+        tfee = d[1].package + d[1].chemistryf + d[1].libraryf;
+        // Admission type or Year
+        if (btype == "New" || byear == 1)
+        {
+            tfee += d[1].admissionf;
+        }
+        if (atrans == 1)
+        {
+            tfee += d[1].transport;
+        }
+        if (cfine == 1)
+        {
+            tfee += d[1].latefine;
+        }
+    }
+    // ICS
+    if (aprog == "ICS")
+    {
+        // loaddata(2);
+        tfee = d[2].package + d[2].computerf + d[2].libraryf;
+        // Admission type or Year
+        if (btype == "New" || byear == 1)
+        {
+            tfee += d[2].admissionf;
+        }
+        if (atrans == 1)
+        {
+            tfee += d[2].transport;
+        }
+        if (cfine == 1)
+        {
+            tfee += d[2].latefine;
+        }
+    }
+    // FA
+    if (aprog == "FA")
+    {
+        // loaddata(3);
+        tfee = d[3].package + d[3].artssocioetyf + d[3].libraryf;
+        // Admission type or Year
+        if (btype == "New" || byear == 1)
+        {
+            tfee += d[3].admissionf;
+        }
+        if (atrans == 1)
+        {
+            tfee += d[3].transport;
+        }
+        if (cfine == 1)
+        {
+            tfee += d[3].latefine;
+        }
+    }
+    return tfee;
+}
+// Update data
+void updatedata()
+{
+    int cont = 0;
+    groundline();
+    cout << "Running Module:Updation of Data";
+    groundline();
+        int id2;
+        string name2;
+    for (int i = 0; i < nostudent; i++)
+    {
+        // if (cont == 1)
+        // {
+        //     break;
+        // }
+
+        cout << "Enter ID of Student:" << endl;
+        cin >> id2;
+        cout << "Enter Name of Student:" << endl;
+        cin >> name2;
+        
+        if (id2 == a[i].id && name2==string(a[i].name))
+        {
+            cout << "Id of Student:" << a[i].id << endl;
+            cout << "Rename Student.Currently It is..." << a[i].name << endl;
+            cin >> a[i].name;
+
+            cout << " Rename Father Name.Currently It is..." << a[i].fathern << endl;
+            cin >> a[i].fathern;
+
+            cout << "Program[FSC(med),FSC(eng),ICS,FA,FA(it)] .Current Status" << a[i].program << endl;
+            cin >> a[i].program;
+            string prog = a[i].program; // pass
+
+            cout << "Intermediate(Part 1 or 2) .Current Status" << a[i].year << endl;
+            cin >> a[i].year;
+            int ayear = a[i].year; // pass
+
+            cout << "Admission Type(Enter 'New' if student is New Qamar).Current Status" << a[i].admissiontype << endl;
+            cin >> a[i].admissiontype;
+            string atype = a[i].admissiontype; // pass
+
+            cout << "Student Use Transport(1/0).Currently Status:" << a[i].stransport << endl;
+            cin >> a[i].stransport;
+            int trans = a[i].stransport; // pass
+
+            cout << "Fined(1/0).Current Status:" << a[i].afine << endl;
+            cin >> a[i].afine;
+            int bfine = a[i].afine; // pass
+
+            cout << "Fee Status(Paid Or NotPaid).Current Status" << a[i].status << endl;
+            cin >> a[i].status;
+
+            cout << "Updated Fee Is" << endl;
+            a[i].totalfee = feecal(string(prog), string(atype), int(ayear), int(trans), int(bfine));
+            cout << a[i].totalfee << endl;
+
+            cout << "Press 1 for exit:";
+            cin >> cont;
+        }
+
+        else
+        {
+            cout << "Name Or ID Not Matched" << endl;
+            break;
+        }
+    }
+}
+// DELETE DATA
+void deletedata()
+{
+    groundline();
+    cout << "Current Module:\tDeletion" << endl;
+    groundline();
+    int index;
+    int id3;
+    string name3;
+    cout << "Enter ID of Student" << endl;
+    cin >> id3;
+    cout << "Enter Name of Student" << endl;
+    cin >> name3;
+    int i;
+    for (int j = 0; j < nostudent; j++)
+    {
+        if (id3 == a[j].id && name3 == a[j].name)
+        {
+            index = j;
+        }
+    }
+    for (i = 0; i < nostudent; i++)
+    {
+        if (i == index)
+        {
+            break;
+        }
+    }
+
+    if (i != nostudent)
+    {
+        int d = 0;
+        for (int b = i; b <= nostudent - 1; b++)
+        {
+            a[b] = a[b + 1];
+            d = 1;
+        }
+        if (d == 1)
+        {
+            --nostudent;
+        }
+    }
+}
+// DISPLAY DATA
+void displaydata()
+{
+    groundline();
+    cout << "Current Module:\tDisplay Data" << endl;
+    groundline();
+
+    string paidf = "Paid";
+    for (int j = 0; j < nostudent; j++)
+    {
+        if (paidf == a[j].status)
+        {
+            cout << "STATUS:"
+                 << "\tPAID" << endl;
+            cout << "ID:" << a[j].id << "\t";
+            cout << "Name:" << a[j].name << "\t";
+            cout << "Father Name:" << a[j].fathern << "\t";
+            cout << "Program:" << a[j].program << "\t";
+            cout << "Year(1st Year or 2nd Year)" << a[j].year << "\t";
+            cout << "Total Fee" << a[j].totalfee << "\t";
+            cout << "Admission Type" << a[j].admissiontype << "\t";
+            cout << "Transport" << a[j].stransport << "\t";
+            cout << "Fine" << a[j].afine << "\t";
+            cout << endl;
+        }
+        else
+        {
+            cout << "STATUS:"
+                 << "\tNOT-PAID" << endl;
+            cout << "ID:" << a[j].id << "\t";
+            cout << "Name:" << a[j].name << "\t";
+            cout << "Father Name:" << a[j].fathern << "\t";
+            cout << "Program:" << a[j].program << "\t";
+            cout << "Year(1st Year or 2nd Year)" << a[j].year << "\t";
+            cout << "Total Fee" << a[j].totalfee << "\t";
+            cout << "Admission Type" << a[j].admissiontype << "\t";
+            cout << "Transport" << a[j].stransport << "\t";
+            cout << "Fine" << a[j].afine << "\t";
+            cout << endl;
+        }
+    }
+}
+// searchdata
+void search()
+{
+
+    groundline();
+    cout << "Current Module:\tSearch" << endl;
+    groundline();
+    // search by id,name,inter part1 or 2,program
+    int choice14 = 1;
+    while (choice14 == 1)
+    {
+        groundline();
+        cout << "Choice Options\n1)Search by id\n2)Search by Name\n3)Search by Part(1 or 2)\n4)Search by program\n5)Exit\n"
+             << endl;
+        int choice13;
+        cin >> choice13;
+
+        //<--------------------------OPTION AREA------------------------------->
+
+        switch (choice13)
+        {
+        case 1:
+        {
+            int idchk;
+            cout << "Enter ID:" << endl;
+            cin >> idchk;
+            for (int i = 0; i < nostudent; i++)
+            {
+                if (idchk == a[i].id)
+                {
+                    cout << "ID:" << a[i].id << "\t";
+                    cout << "Name:" << a[i].name << "\t";
+                    cout << "Father Name:" << a[i].fathern << "\t";
+                    cout << "Program:" << a[i].program << "\t";
+                    cout << "Year(1st Year or 2nd Year)" << a[i].year << "\t";
+                    cout << "Total Fee" << a[i].totalfee << "\t";
+                    cout << "Admission Type" << a[i].admissiontype << "\t";
+                    cout << "Transport" << a[i].stransport << "\t";
+                    cout << "Fine" << a[i].afine << "\t";
+                    cout << endl;
+                }
+            }
+            break;
+        }
+        case 2:
+        {
+            string chkname;
+            cout << "Enter Name:" << endl;
+            cin >> chkname;
+            for (int i = 0; i < nostudent; i++)
+            {
+                if (chkname == string(a[i].name))
+                {
+
+                    cout << "ID:" << a[i].id << "\t";
+                    cout << "Name:" << a[i].name << "\t";
+                    cout << "Father Name:" << a[i].fathern << "\t";
+                    cout << "Program:" << a[i].program << "\t";
+                    cout << "Year(1st Year or 2nd Year)" << a[i].year << "\t";
+                    cout << "Total Fee" << a[i].totalfee << "\t";
+                    cout << "Admission Type" << a[i].admissiontype << "\t";
+                    cout << "Transport" << a[i].stransport << "\t";
+                    cout << "Fine" << a[i].afine << "\t";
+                    cout << endl;
+                }
+            }
+            break;
+        }
+        case 3:
+        {
+            int chkyear;
+            cout << "Enter Part (1 or 2):" << endl;
+            cin >> chkyear;
+            for (int i = 0; i < nostudent; i++)
+            {
+                if (chkyear == a[i].year)
+                {
+
+                    cout << "ID:" << a[i].id << "\t";
+                    cout << "Name:" << a[i].name << "\t";
+                    cout << "Father Name:" << a[i].fathern << "\t";
+                    cout << "Program:" << a[i].program << "\t";
+                    cout << "Year(1st Year or 2nd Year)" << a[i].year << "\t";
+                    cout << "Total Fee" << a[i].totalfee << "\t";
+                    cout << "Admission Type" << a[i].admissiontype << "\t";
+                    cout << "Transport" << a[i].stransport << "\t";
+                    cout << "Fine" << a[i].afine << "\t";
+                    cout << endl;
+                }
+            }
+            break;
+        }
+        case 4:
+        {
+            string chkprogram;
+            cout << "Enter Program:FSC(med)\tFSC(eng)\tICS\tFA\t\t" << endl;
+            cin >> chkprogram;
+            for (int i = 0; i < nostudent; i++)
+            {
+                if (chkprogram == string(a[i].program))
+                {
+
+                    cout << "ID:" << a[i].id << "\t";
+                    cout << "Name:" << a[i].name << "\t";
+                    cout << "Father Name:" << a[i].fathern << "\t";
+                    cout << "Program:" << a[i].program << "\t";
+                    cout << "Year(1st Year or 2nd Year)" << a[i].year << "\t";
+                    cout << "Total Fee" << a[i].totalfee << "\t";
+                    cout << "Admission Type" << a[i].admissiontype << "\t";
+                    cout << "Transport" << a[i].stransport << "\t";
+                    cout << "Fine" << a[i].afine << "\t";
+                    cout << endl;
+                }
+            }
+            break;
+        }
+        case 5:
+        {
+            break;
+        }
+        }
+        cout << "Go Back to Search Menu(Press 1)" << endl;
+        cin >> choice14;
+        //<-----------------------------END---------------------------------->
+    }
+}
+
+void report()
+{
+
+    groundline();
+    cout << "Current Module:\tReport Module" << endl;
+    groundline();
+    // program,year,status
+    // Paid or NotPaid
+    // 1or2
+    // FSC(med)\tFSC(eng)\tICS\tFA\tFA
+    int choice16;
+    do
+    {
+        cout << "Choose option:\t1)Report by Programs\t2)Report by Inter Part(1 or 2)\t3)Fee Status Report\t" << endl;
+        int choice15;
+        cin >> choice15;
+
+        switch (choice15) // 2)
+        {
+        case 1:
+        {
+            groundline();
+            cout << "FSC PRE MEDICAL STUDENTS REPORT" << endl;
+            groundline();
+            for (int i = 0; i < nostudent; i++)
+            {
+                if (a[i].program == "FSC(med)")
+                {
+                    cout << "FEE STATUS:" << a[i].status << "\t";
+                    cout << "ID:" << a[i].id << "\t";
+                    cout << "Name:" << a[i].name << "\t";
+                    cout << "Father Name:" << a[i].fathern << "\t";
+                    cout << "Program:" << a[i].program << "\t";
+                    cout << "Year(1st Year or 2nd Year)" << a[i].year << "\t";
+                    cout << "Total Fee" << a[i].totalfee << "\t";
+                    cout << "Admission Type" << a[i].admissiontype << "\t";
+                    cout << "Transport" << a[i].stransport << "\t";
+                    cout << "Fine" << a[i].afine << "\t";
+                    cout << endl;
+                    groundline();
+                }
+            }
+            groundline();
+            cout << "FSC PRE ENGINEERING STUDENTS" << endl;
+            groundline();
+            for (int i = 0; i < nostudent; i++)
+            {
+                if (a[i].program == "FSC(eng)")
+                {
+                    cout << "FEE STATUS:" << a[i].status << "\t";
+                    cout << "ID:" << a[i].id << "\t";
+                    cout << "Name:" << a[i].name << "\t";
+                    cout << "Father Name:" << a[i].fathern << "\t";
+                    cout << "Program:" << a[i].program << "\t";
+                    cout << "Year(1st Year or 2nd Year)" << a[i].year << "\t";
+                    cout << "Total Fee" << a[i].totalfee << "\t";
+                    cout << "Admission Type" << a[i].admissiontype << "\t";
+                    cout << "Transport" << a[i].stransport << "\t";
+                    cout << "Fine" << a[i].afine << "\t";
+                    cout << endl;
+                }
+            }
+            cout << "ICS STUDENTS REPORT" << endl;
+            for (int i = 0; i < nostudent; i++)
+            {
+                if (a[i].program == "ICS")
+                {
+                    cout << "FEE STATUS:" << a[i].status << "\t";
+                    cout << "ID:" << a[i].id << "\t";
+                    cout << "Name:" << a[i].name << "\t";
+                    cout << "Father Name:" << a[i].fathern << "\t";
+                    cout << "Program:" << a[i].program << "\t";
+                    cout << "Year(1st Year or 2nd Year)" << a[i].year << "\t";
+                    cout << "Total Fee" << a[i].totalfee << "\t";
+                    cout << "Admission Type" << a[i].admissiontype << "\t";
+                    cout << "Transport" << a[i].stransport << "\t";
+                    cout << "Fine" << a[i].afine << "\t";
+                    cout << endl;
+                }
+            }
+            cout << "FA STUDENTS REPORT" << endl;
+            for (int i = 0; i < nostudent; i++)
+            {
+                if (a[i].program == "FA")
+                {
+                    cout << "FEE STATUS:" << a[i].status << "\t";
+                    cout << "ID:" << a[i].id << "\t";
+                    cout << "Name:" << a[i].name << "\t";
+                    cout << "Father Name:" << a[i].fathern << "\t";
+                    cout << "Program:" << a[i].program << "\t";
+                    cout << "Year(1st Year or 2nd Year)" << a[i].year << "\t";
+                    cout << "Total Fee" << a[i].totalfee << "\t";
+                    cout << "Admission Type" << a[i].admissiontype << "\t";
+                    cout << "Transport" << a[i].stransport << "\t";
+                    cout << "Fine" << a[i].afine << "\t";
+                    cout << endl;
+                }
+            }
+            break;
+        }
+        case 2:
+        {
+            cout << "Intermediate Part 1 Students Report" << endl;
+            for (int i = 0; i < nostudent; i++)
+            {
+                if (a[i].year == 1)
+                {
+                    cout << "FEE STATUS:" << a[i].status << "\t";
+
+                    cout << "ID:" << a[i].id << "\t";
+                    cout << "Name:" << a[i].name << "\t";
+                    cout << "Father Name:" << a[i].fathern << "\t";
+                    cout << "Program:" << a[i].program << "\t";
+                    cout << "Year(1st Year or 2nd Year)" << a[i].year << "\t";
+                    cout << "Total Fee" << a[i].totalfee << "\t";
+                    cout << "Admission Type" << a[i].admissiontype << "\t";
+                    cout << "Transport" << a[i].stransport << "\t";
+                    cout << "Fine" << a[i].afine << "\t";
+                    cout << endl;
+                }
+            }
+            cout << "Intermediate Part 2 Students Report" << endl;
+            for (int i = 0; i < nostudent; i++)
+            {
+                if (a[i].year == 2)
+                {
+                    cout << "FEE STATUS:" << a[i].status << "\t";
+
+                    cout << "ID:" << a[i].id << "\t";
+                    cout << "Name:" << a[i].name << "\t";
+                    cout << "Father Name:" << a[i].fathern << "\t";
+                    cout << "Program:" << a[i].program << "\t";
+                    cout << "Year(1st Year or 2nd Year)" << a[i].year << "\t";
+                    cout << "Total Fee" << a[i].totalfee << "\t";
+                    cout << "Admission Type" << a[i].admissiontype << "\t";
+                    cout << "Transport" << a[i].stransport << "\t";
+                    cout << "Fine" << a[i].afine << "\t";
+                    cout << endl;
+                }
+            }
+            break;
+        }
+        case 3:
+        {
+            cout << "Students Submitted Fee Already" << endl;
+            for (int i = 0; i < nostudent; i++)
+            {
+                if (a[i].status == "Paid")
+                {
+                    // cout << "FEE STATUS:"<< "\tPAID" << endl;
+                    cout << "ID:" << a[i].id << "\t";
+                    cout << "Name:" << a[i].name << "\t";
+                    cout << "Father Name:" << a[i].fathern << "\t";
+                    cout << "Program:" << a[i].program << "\t";
+                    cout << "Year(1st Year or 2nd Year)" << a[i].year << "\t";
+                    cout << "Total Fee" << a[i].totalfee << "\t";
+                    cout << "Admission Type" << a[i].admissiontype << "\t";
+                    cout << "Transport" << a[i].stransport << "\t";
+                    cout << "Fine" << a[i].afine << "\t";
+                    cout << endl;
+                }
+            }
+            cout << "Fee Defaulters Report" << endl;
+            for (int i = 0; i < nostudent; i++)
+            {
+                if (a[i].status == "NotPaid")
+                {
+                    // cout << "FEE STATUS:"<< "\tPAID" << endl;
+                    cout << "ID:" << a[i].id << "\t";
+                    cout << "Name:" << a[i].name << "\t";
+                    cout << "Father Name:" << a[i].fathern << "\t";
+                    cout << "Program:" << a[i].program << "\t";
+                    cout << "Year(1st Year or 2nd Year)" << a[i].year << "\t";
+                    cout << "Total Fee" << a[i].totalfee << "\t";
+                    cout << "Admission Type" << a[i].admissiontype << "\t";
+                    cout << "Transport" << a[i].stransport << "\t";
+                    cout << "Fine" << a[i].afine << "\t";
+                    cout << endl;
+                }
+            }
+            break;
+        }
+            cout << "Go Back To Report Menu" << endl;
+            cin >> choice16;
+        }
+    } while (choice16 == 1);
+}
+// Data Load
+void tofile()
+{
+    fstream migrate;
+    migrate.open("admin.txt", ios::out); // write data in admin.txt
+    if (migrate.is_open())
+    {
+        for (int k = 0; k < 4; k++)
+        {
+            migrate << d[k].admissionf << endl;
+            migrate << d[k].biolabf << endl;
+            migrate << d[k].chemistryf << endl;
+            migrate << d[k].computerf << endl;
+            migrate << d[k].libraryf << endl;
+            migrate << d[k].transport << endl;
+            migrate << d[k].artssocioetyf << endl;
+            migrate << d[k].latefine << endl;
+            migrate << d[k].lastdate << endl;
+            migrate << d[k].package << endl;
+        }
+        migrate.close();
+    }
+    else
+    {
+        cout << "File Not Found" << endl;
+    }
+}
+// get data from file
+void getdata()
+{
+    fstream getting;
+    getting.open("admin.txt", ios::in);
+    if (getting.is_open())
+    {
+        for (int h = 0; h < 4; h++)
+        {
+            getting >> d[h].admissionf;
+            getting >> d[h].biolabf;
+            getting >> d[h].chemistryf;
+            getting >> d[h].computerf;
+            getting >> d[h].libraryf;
+            getting >> d[h].transport;
+            getting >> d[h].artssocioetyf;
+            getting >> d[h].latefine;
+            getting >> d[h].lastdate;
+            getting >> d[h].package;
+        }
+    }
+}
+// // student data go to file
+void godata()
+{
+
+    fstream gotofile;
+    gotofile.open("student.txt", ios::out); // write data in admin.txt
+    if (gotofile.is_open())
+    {
+        for (int k = 0; k < nostudent; k++)
+        {
+            gotofile << a[k].id << endl;
+            gotofile << a[k].name << endl;
+            gotofile << a[k].fathern << endl;
+            gotofile << a[k].program << endl;
+            gotofile << a[k].year << endl;
+            gotofile << a[k].totalfee << endl;
+            gotofile << a[k].admissiontype << endl;
+            gotofile << a[k].stransport << endl;
+            gotofile << a[k].afine << endl;
+            gotofile << a[k].status << endl;
+        }
+        gotofile.close();
+    }
+    else
+    {
+        cout << "File Not Found" << endl;
+    }
+}
+// student data get from file
+void studentdata()
+{
+    fstream getstudent;
+    getstudent.open("student.txt", ios::in); // read data in admin.txt
+    if (getstudent.is_open())
+    {
+        for (int k = 0; k < nostudent2; k++)
+        {
+            getstudent >> a[k].id;
+            getstudent >> a[k].name;
+            getstudent >> a[k].fathern;
+            getstudent >> a[k].program;
+            getstudent >> a[k].year;
+            getstudent >> a[k].totalfee;
+            getstudent >> a[k].admissiontype;
+            getstudent >> a[k].stransport;
+            getstudent >> a[k].afine;
+            getstudent >> a[k].status;
+            nostudent++;
+        }
+        getstudent.close();
+    }
+}
+void studentsearch()
+{
+    int id2;
+    string name2;
+    cout << "Enter Your Id:" << endl;
+    cin >> id2;
+    cout << "Enter Name of Student:" << endl;
+    cin >> name2;
+    for (int i = 0; i < nostudent; i++)
+    {
+        if (id2 == a[i].id && name2 == a[i].name)
+        {
+            cout << "ID:" << a[i].id << "\n";
+            cout << "Name:" << a[i].name << "\n";
+            cout << "Father Name:" << a[i].fathern << "\n";
+            cout << "Program:" << a[i].program << "\n";
+            cout << "Year(1st Year or 2nd Year)" << a[i].year << "\n";
+            cout << "Total Fee" << a[i].totalfee << "\n";
+            cout << "Admission Type" << a[i].admissiontype << "\n";
+            cout << "Transport" << a[i].stransport << "\n";
+            cout << "Fine" << a[i].afine << "\n";
+            cout << "Fee Status" << a[i].status << "\n";
+        }
+    }
+}
